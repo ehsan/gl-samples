@@ -49,7 +49,8 @@
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include "eglut.h"
+#include <SDL/SDL.h>
+#include <SDL/SDL_opengl.h>
 
 #define STRIPS_PER_TOOTH 7
 #define VERTICES_PER_TOOTH 34
@@ -555,6 +556,7 @@ gears_reshape(int width, int height)
  * 
  * @param special the event to handle.
  */
+/*
 static void
 gears_special(int special)
 {
@@ -573,13 +575,14 @@ gears_special(int special)
          break;
    }
 }
+*/
 
 static void
 gears_idle(void)
 {
    static int frames = 0;
    static double tRot0 = -1.0, tRate0 = -1.0;
-   double dt, t = eglutGet(EGLUT_ELAPSED_TIME) / 1000.0;
+   double dt, t = 0.1; // eglutGet(EGLUT_ELAPSED_TIME) / 1000.0;
 
    if (tRot0 < 0.0)
       tRot0 = t;
@@ -591,7 +594,6 @@ gears_idle(void)
    if (angle > 3600.0)
       angle -= 3600.0;
 
-   eglutPostRedisplay();
    frames++;
 
    if (tRate0 < 0.0)
@@ -635,7 +637,9 @@ static const char vertex_shader[] =
 "}";
 
 static const char fragment_shader[] =
+"#ifdef GL_ES\n"
 "precision mediump float;\n"
+"#endif\n"
 "varying vec4 Color;\n"
 "\n"
 "void main(void)\n"
@@ -671,17 +675,23 @@ gears_init(void)
 
    /* Create and link the shader program */
    program = glCreateProgram();
+   printf("prog: %d\n", glIsProgram(program));
+   printf("program: %d\n", program);
    glAttachShader(program, v);
    glAttachShader(program, f);
    glBindAttribLocation(program, 0, "position");
    glBindAttribLocation(program, 1, "normal");
 
    glLinkProgram(program);
+   printf("prog: %d\n", glIsProgram(program));
    glGetProgramInfoLog(program, sizeof msg, NULL, msg);
    printf("info: %s\n", msg);
 
    /* Enable the shaders */
    glUseProgram(program);
+
+   printf("error: %d\n", glGetError());
+   printf("prog: %d\n", glIsProgram(program));
 
    /* Get the locations of the uniforms so we can access them */
    ModelViewProjectionMatrix_location = glGetUniformLocation(program, "ModelViewProjectionMatrix");
@@ -697,27 +707,66 @@ gears_init(void)
    gear2 = create_gear(0.5, 2.0, 2.0, 10, 0.7);
    gear3 = create_gear(1.3, 2.0, 0.5, 10, 0.7);
 }
+ 
+static Uint32 tick(Uint32 interval, void* param)
+{
+	SDL_Event e;
+	e.type = SDL_VIDEOEXPOSE;
+
+        gears_idle();
+
+	SDL_PushEvent(&e); /* Since SDL calls timers in another thread, we cannot
+						  call rendering functions from here. */
+
+	return interval;
+}
 
 int
 main(int argc, char *argv[])
 {
+   int i;
+
    /* Initialize the window */
-   eglutInitWindowSize(300, 300);
-   eglutInitAPIMask(EGLUT_OPENGL_ES2_BIT);
-   eglutInit(argc, argv);
-
-   eglutCreateWindow("es2gears");
-
-   /* Set up eglut callback functions */
-   eglutIdleFunc(gears_idle);
-   eglutReshapeFunc(gears_reshape);
-   eglutDisplayFunc(gears_draw);
-   eglutSpecialFunc(gears_special);
+   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
+     return 1;
+   }
 
    /* Initialize the gears */
    gears_init();
 
-   eglutMainLoop();
+   if (SDL_SetVideoMode(300, 300, 32, SDL_OPENGL) == NULL) {
+     return 2;
+   }
+
+   /* Set up eglut callback functions */
+/*
+   eglutIdleFunc(gears_idle);
+   eglutReshapeFunc(gears_reshape);
+   eglutDisplayFunc(gears_draw);
+   eglutSpecialFunc(gears_special);
+*/
+
+   SDL_TimerID timer = SDL_AddTimer(30, tick, NULL);
+   if (!timer) {
+     return 3;
+   }
+
+   SDL_Event event;
+   while (SDL_WaitEvent(&event)) {
+     switch (event.type) {
+     case SDL_QUIT:
+       goto quit;
+     case SDL_VIDEOEXPOSE:
+       glClearColor(1, 0.5, 0.3, 1);
+       glClear(GL_COLOR_BUFFER_BIT);
+       gears_draw();
+       SDL_GL_SwapBuffers();
+       break;
+     }
+   }
+      
+quit:
+   SDL_Quit();
 
    return 0;
 }
