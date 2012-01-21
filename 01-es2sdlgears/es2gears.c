@@ -675,22 +675,18 @@ gears_init(void)
 
    /* Create and link the shader program */
    program = glCreateProgram();
-   printf("prog: %d\n", glIsProgram(program));
-   printf("program: %d\n", program);
    glAttachShader(program, v);
    glAttachShader(program, f);
    glBindAttribLocation(program, 0, "position");
    glBindAttribLocation(program, 1, "normal");
 
    glLinkProgram(program);
-   printf("prog: %d\n", glIsProgram(program));
    glGetProgramInfoLog(program, sizeof msg, NULL, msg);
    printf("info: %s\n", msg);
 
    /* Enable the shaders */
    glUseProgram(program);
 
-   printf("error: %d\n", glGetError());
    printf("prog: %d\n", glIsProgram(program));
 
    /* Get the locations of the uniforms so we can access them */
