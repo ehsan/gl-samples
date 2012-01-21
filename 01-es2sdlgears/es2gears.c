@@ -731,12 +731,12 @@ main(int argc, char *argv[])
      return 1;
    }
 
-   /* Initialize the gears */
-   gears_init();
-
    if (SDL_SetVideoMode(300, 300, 32, SDL_OPENGL) == NULL) {
      return 2;
    }
+
+   /* Initialize the gears */
+   gears_init();
 
    /* Set up eglut callback functions */
 /*
