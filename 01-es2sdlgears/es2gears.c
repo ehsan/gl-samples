@@ -735,6 +735,8 @@ main(int argc, char *argv[])
    /* Initialize the gears */
    gears_init();
 
+   gears_reshape (300, 300);
+
    /* Set up eglut callback functions */
 /*
    eglutIdleFunc(gears_idle);
