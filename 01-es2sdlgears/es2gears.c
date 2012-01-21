@@ -754,8 +754,6 @@ main(int argc, char *argv[])
      case SDL_QUIT:
        goto quit;
      case SDL_VIDEOEXPOSE:
-       glClearColor(1, 0.5, 0.3, 1);
-       glClear(GL_COLOR_BUFFER_BIT);
        gears_draw();
        SDL_GL_SwapBuffers();
        break;
