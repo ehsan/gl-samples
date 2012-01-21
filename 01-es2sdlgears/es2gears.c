@@ -580,9 +580,11 @@ gears_special(int special)
 static void
 gears_idle(void)
 {
+   static double begin = 0.0;
    static int frames = 0;
    static double tRot0 = -1.0, tRate0 = -1.0;
-   double dt, t = 0.1; // eglutGet(EGLUT_ELAPSED_TIME) / 1000.0;
+   double dt, t = 0.1 + begin; // eglutGet(EGLUT_ELAPSED_TIME) / 1000.0;
+   begin = t;
 
    if (tRot0 < 0.0)
       tRot0 = t;
