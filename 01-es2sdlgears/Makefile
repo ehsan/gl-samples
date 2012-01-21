@@ -3,4 +3,4 @@ demo: es2gears.c
 	#CXX=emcc OUTPUT=demo.html make target
 
 target: es2gears.c
-	${CXX} es2gears.c -g -lGL -lSDL -o ${OUTPUT}
+	${CXX} es2gears.c -g -o ${OUTPUT} `pkg-config --cflags --libs gl sdl` -lm
