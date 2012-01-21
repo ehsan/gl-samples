@@ -3,4 +3,4 @@ demo: main.cpp
 	CXX=em++ OUTPUT=demo.html make target
 
 target: main.cpp
-	${CXX} main.cpp -lGL -lSDL -o ${OUTPUT}
+	${CXX} main.cpp -o ${OUTPUT} `pkg-config --cflags --libs gl sdl` -lm
