@@ -688,8 +688,6 @@ gears_init(void)
    /* Enable the shaders */
    glUseProgram(program);
 
-   printf("prog: %d\n", glIsProgram(program));
-
    /* Get the locations of the uniforms so we can access them */
    ModelViewProjectionMatrix_location = glGetUniformLocation(program, "ModelViewProjectionMatrix");
    NormalMatrix_location = glGetUniformLocation(program, "NormalMatrix");
