@@ -47,10 +47,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <GLES2/gl2.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
 #include <SDL/SDL.h>
-#include <SDL/SDL_opengl.h>
 
 #define STRIPS_PER_TOOTH 7
 #define VERTICES_PER_TOOTH 34
