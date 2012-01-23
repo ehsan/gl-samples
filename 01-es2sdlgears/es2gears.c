@@ -748,7 +748,9 @@ main(int argc, char *argv[])
    }
 
    SDL_Event event;
-   while (SDL_WaitEvent(&event)) {
+   while (1) {
+     // Busy wait for the event, because we can't implement SDL_WaitEvent in js
+     while (!SDL_PollEvent(&event));
      switch (event.type) {
      case SDL_QUIT:
        goto quit;
