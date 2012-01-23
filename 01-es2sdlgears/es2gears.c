@@ -47,7 +47,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <GLES2/gl2.h>
-#include <SDL/SDL.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include "eglut.c"
 
 #define STRIPS_PER_TOOTH 7
 #define VERTICES_PER_TOOTH 34
@@ -553,7 +555,6 @@ gears_reshape(int width, int height)
  * 
  * @param special the event to handle.
  */
-/*
 static void
 gears_special(int special)
 {
@@ -572,16 +573,13 @@ gears_special(int special)
          break;
    }
 }
-*/
 
 static void
 gears_idle(void)
 {
-   static double begin = 0.0;
    static int frames = 0;
    static double tRot0 = -1.0, tRate0 = -1.0;
-   double dt, t = 0.1 + begin; // eglutGet(EGLUT_ELAPSED_TIME) / 1000.0;
-   begin = t;
+   double dt, t = eglutGet(EGLUT_ELAPSED_TIME) / 1000.0;
 
    if (tRot0 < 0.0)
       tRot0 = t;
@@ -593,6 +591,7 @@ gears_idle(void)
    if (angle > 3600.0)
       angle -= 3600.0;
 
+   eglutPostRedisplay();
    frames++;
 
    if (tRate0 < 0.0)
@@ -615,7 +614,6 @@ static const char vertex_shader[] =
 "uniform mat4 NormalMatrix;\n"
 "uniform vec4 LightSourcePosition;\n"
 "uniform vec4 MaterialColor;\n"
-"uniform vec4 dummy;\n"
 "\n"
 "varying vec4 Color;\n"
 "\n"
@@ -630,7 +628,7 @@ static const char vertex_shader[] =
 "    // Multiply the diffuse value by the vertex color (which is fixed in this case)\n"
 "    // to get the actual color that we will use to draw this vertex with\n"
 "    float diffuse = max(dot(N, L), 0.0);\n"
-"    Color = diffuse * MaterialColor + dummy;\n"
+"    Color = diffuse * MaterialColor;\n"
 "\n"
 "    // Transform the position to clip coordinates\n"
 "    gl_Position = ModelViewProjectionMatrix * vec4(position, 1.0);\n"
@@ -701,68 +699,27 @@ gears_init(void)
    gear2 = create_gear(0.5, 2.0, 2.0, 10, 0.7);
    gear3 = create_gear(1.3, 2.0, 0.5, 10, 0.7);
 }
- 
-static Uint32 tick(Uint32 interval, void* param)
-{
-	SDL_Event e;
-	e.type = SDL_VIDEOEXPOSE;
-
-        gears_idle();
-
-	SDL_PushEvent(&e); /* Since SDL calls timers in another thread, we cannot
-						  call rendering functions from here. */
-
-	return interval;
-}
 
 int
 main(int argc, char *argv[])
 {
-   int i;
-
    /* Initialize the window */
-   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
-     return 1;
-   }
+   eglutInitWindowSize(300, 300);
+   eglutInitAPIMask(EGLUT_OPENGL_ES2_BIT);
+   eglutInit(argc, argv);
 
-   if (SDL_SetVideoMode(300, 300, 32, SDL_OPENGL) == NULL) {
-     return 2;
-   }
-
-   /* Initialize the gears */
-   gears_init();
-
-   gears_reshape (300, 300);
+   eglutCreateWindow("es2gears");
 
    /* Set up eglut callback functions */
-/*
    eglutIdleFunc(gears_idle);
    eglutReshapeFunc(gears_reshape);
    eglutDisplayFunc(gears_draw);
    eglutSpecialFunc(gears_special);
-*/
 
-   SDL_TimerID timer = SDL_AddTimer(30, tick, NULL);
-   if (!timer) {
-     return 3;
-   }
+   /* Initialize the gears */
+   gears_init();
 
-   SDL_Event event;
-   while (1) {
-     // Busy wait for the event, because we can't implement SDL_WaitEvent in js
-     while (!SDL_PollEvent(&event));
-     switch (event.type) {
-     case SDL_QUIT:
-       goto quit;
-     case SDL_VIDEOEXPOSE:
-       gears_draw();
-       SDL_GL_SwapBuffers();
-       break;
-     }
-   }
-      
-quit:
-   SDL_Quit();
+   eglutMainLoop();
 
    return 0;
 }
