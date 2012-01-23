@@ -46,14 +46,17 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <GLES2/gl2.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include "eglut.c"
+#include <GL/gl.h>
+#include <GL/glut.h>
 
 #define STRIPS_PER_TOOTH 7
 #define VERTICES_PER_TOOTH 34
 #define GEAR_VERTEX_STRIDE 6
+
+void sincos(double x, double* sine, double* cosine) {
+  *cosine = cos(x);
+  *sine = sin(x);
+}
 
 /**
  * Struct describing the vertices in triangle strip
@@ -532,6 +535,8 @@ gears_draw(void)
    draw_gear(gear1, transform, -3.0, -2.0, angle, red);
    draw_gear(gear2, transform, 3.1, -2.0, -2 * angle - 9.0, green);
    draw_gear(gear3, transform, -3.1, 4.2, -2 * angle - 25.0, blue);
+
+   glutSwapBuffers();
 }
 
 /** 
@@ -551,24 +556,24 @@ gears_reshape(int width, int height)
 }
 
 /** 
- * Handles special eglut events.
+ * Handles special glut events.
  * 
  * @param special the event to handle.
  */
 static void
-gears_special(int special)
+gears_special(int special, int crap, int morecrap)
 {
    switch (special) {
-      case EGLUT_KEY_LEFT:
+      case GLUT_KEY_LEFT:
          view_rot[1] += 5.0;
          break;
-      case EGLUT_KEY_RIGHT:
+      case GLUT_KEY_RIGHT:
          view_rot[1] -= 5.0;
          break;
-      case EGLUT_KEY_UP:
+      case GLUT_KEY_UP:
          view_rot[0] += 5.0;
          break;
-      case EGLUT_KEY_DOWN:
+      case GLUT_KEY_DOWN:
          view_rot[0] -= 5.0;
          break;
    }
@@ -579,7 +584,7 @@ gears_idle(void)
 {
    static int frames = 0;
    static double tRot0 = -1.0, tRate0 = -1.0;
-   double dt, t = eglutGet(EGLUT_ELAPSED_TIME) / 1000.0;
+   double dt, t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
 
    if (tRot0 < 0.0)
       tRot0 = t;
@@ -591,7 +596,7 @@ gears_idle(void)
    if (angle > 3600.0)
       angle -= 3600.0;
 
-   eglutPostRedisplay();
+   glutPostRedisplay();
    frames++;
 
    if (tRate0 < 0.0)
@@ -704,22 +709,22 @@ int
 main(int argc, char *argv[])
 {
    /* Initialize the window */
-   eglutInitWindowSize(300, 300);
-   eglutInitAPIMask(EGLUT_OPENGL_ES2_BIT);
-   eglutInit(argc, argv);
+   glutInit(&argc, argv);
+   glutInitWindowSize(300, 300);
+   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
-   eglutCreateWindow("es2gears");
+   glutCreateWindow("es2gears");
 
-   /* Set up eglut callback functions */
-   eglutIdleFunc(gears_idle);
-   eglutReshapeFunc(gears_reshape);
-   eglutDisplayFunc(gears_draw);
-   eglutSpecialFunc(gears_special);
+   /* Set up glut callback functions */
+   glutIdleFunc(gears_idle);
+   glutReshapeFunc(gears_reshape);
+   glutDisplayFunc(gears_draw);
+   glutSpecialFunc(gears_special);
 
    /* Initialize the gears */
    gears_init();
 
-   eglutMainLoop();
+   glutMainLoop();
 
    return 0;
 }
