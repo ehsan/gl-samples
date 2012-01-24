@@ -53,11 +53,6 @@
 #define VERTICES_PER_TOOTH 34
 #define GEAR_VERTEX_STRIDE 6
 
-void sincos(double x, double* sine, double* cosine) {
-  *cosine = cos(x);
-  *sine = sin(x);
-}
-
 /**
  * Struct describing the vertices in triangle strip
  */
