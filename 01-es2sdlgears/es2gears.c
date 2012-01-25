@@ -49,7 +49,7 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 
-#ifndef HAVE_SINCOS
+#ifndef HAVE_BUILTIN_SINCOS
 #include "sincos.h"
 #endif
 
