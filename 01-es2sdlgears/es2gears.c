@@ -49,6 +49,10 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 
+#ifndef HAVE_SINCOS
+#include "sincos.h"
+#endif
+
 #define STRIPS_PER_TOOTH 7
 #define VERTICES_PER_TOOTH 34
 #define GEAR_VERTEX_STRIDE 6
