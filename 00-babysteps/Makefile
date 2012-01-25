@@ -2,7 +2,7 @@ CFLAGS=-O3
 
 PLATFORM := $(shell uname -a | cut -d ' ' -f 1)
 ifeq ($(PLATFORM),Darwin)
-LIBS=-framework OpenGL $(shel pkg-config sdl) -lm
+LIBS=-framework OpenGL $(shell pkg-config --cflags --libs sdl) -lm
 else
 LIBS=$(shell pkg-config --cflags --libs gl sdl) -lm
 # TODO: Handle Windows as well
